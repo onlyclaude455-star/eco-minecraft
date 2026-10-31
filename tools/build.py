@@ -23,7 +23,7 @@ DIST = os.path.join(RAIZ, "dist")
 BP = os.path.join(BUILD, "ECO_BP")
 RP = os.path.join(BUILD, "ECO_RP")
 
-VERSION = [2, 1, 1]
+VERSION = [2, 2, 0]
 MIN_MOTOR = [1, 21, 50]
 API_SERVER = "1.16.0"
 API_UI = "1.3.0"
@@ -359,7 +359,97 @@ def nieblas():
                 "distance": {"air": cfg, "weather": cfg},
             },
         }
-    return {"niebla": niebla("niebla", "#0b0b0e", 6, 42), "niebla_roja": niebla("niebla_roja", "#3d0000", 3, 30)}
+    return {
+        "niebla": niebla("niebla", "#0b0b0e", 6, 42),
+        "niebla_roja": niebla("niebla_roja", "#3d0000", 3, 30),
+        # todas las noches: cielo rojo oscuro
+        "noche_sangre": niebla("noche_sangre", "#4a0606", 10, 64),
+        # de día: bruma gris y enfermiza
+        "dia_gris": niebla("dia_gris", "#7d716b", 24, 120),
+    }
+
+
+def texturas_entorno():
+    """Cielo de ECO: luna roja con cara, sol eclipsado, nubes de sangre y lluvia roja."""
+    d = os.path.join(RP, "textures", "environment")
+    os.makedirs(d, exist_ok=True)
+    rng = np.random.default_rng(66)
+    yy, xx = np.mgrid[0:128, 0:128]
+
+    # luna: 8 fases (4x2) siempre llena y roja; la sonrisa crece en cada fase.
+    # La luna se dibuja en modo aditivo: lo negro se ve como un agujero al cielo.
+    luna = np.zeros((256, 512, 3), np.float32)
+    for fase in range(8):
+        r = np.hypot(xx - 64, yy - 64)
+        disco = np.clip((54 - r) / 2.0, 0, 1)
+        sombra = np.clip(1 - (r / 54) ** 3 * 0.55, 0, 1)  # borde más oscuro, como una esfera
+        manchas = modelos.ruido(128, 128, 10, rng)
+        grano = modelos.ruido(128, 128, 2, rng)
+        crateres = np.ones((128, 128), np.float32)
+        for _ in range(14):
+            cx, cy, cr = rng.uniform(20, 108), rng.uniform(20, 108), rng.uniform(3, 9)
+            dc = np.hypot(xx - cx, yy - cy)
+            crateres *= 1 - 0.35 * np.clip(1 - dc / cr, 0, 1)
+        base = (0.45 + manchas * 0.4 + grano * 0.15) * crateres * sombra * disco
+        img = np.stack([base, base * 0.06, base * 0.05], axis=-1)
+        img[..., 0] += np.clip(1 - (r - 54) / 9, 0, 1) * (r > 54) * 0.28  # halo rojo
+        cara = np.ones((128, 128), np.float32)
+        # cuencas hundidas, desiguales, con una pupila diminuta
+        for ex, ey, rx, ry in ((43, 49, 10, 13), (86, 46, 11, 14)):
+            e = ((xx - ex) / rx) ** 2 + ((yy - ey) / ry) ** 2
+            cara = np.where(e <= 1, 0.02, np.where(e <= 1.9, cara * 0.45, cara))
+        # sonrisa torcida: más larga y más alta del lado derecho
+        abertura = 5 + fase * 2.0
+        for x in range(22, 112):
+            t = (x - 22) / 89
+            k = max(0.0, 1 - (2 * t - 1) ** 2)
+            centro = 80 + 11 * k - 9 * t ** 3
+            ab = max(1.2, abertura * math.sqrt(k))
+            y0, y1 = int(round(centro - ab / 2)), int(round(centro + ab / 2))
+            cara[y0:y1 + 1, x] = 0.02
+            if ab > 3:
+                largo = int(ab * rng.uniform(0.25, 0.45))
+                if x % 3 == 0:  # dientes desiguales y separados
+                    cara[y0:y0 + largo, x] = 0.85
+                if x % 3 == 1:
+                    cara[y1 - largo + 1:y1 + 1, x] = 0.85
+        img *= cara[..., None]
+        # sangre que cae de los ojos y de la boca
+        for x0, y0, largo in ((43, 62, 14 + fase * 3), (88, 60, 10 + fase * 3), (60, 92, 8 + fase * 2), (95, 82, 6 + fase * 2)):
+            for k in range(largo):
+                y = y0 + k
+                if y < 128 and disco[y, x0] > 0.5:
+                    img[y, x0:x0 + (2 if k > largo - 3 else 1)] = [0.9, 0.0, 0.0]
+        fy, fx = divmod(fase, 4)
+        luna[fy * 128:(fy + 1) * 128, fx * 128:(fx + 1) * 128] = img
+    Image.fromarray((np.clip(luna, 0, 1) * 255).astype(np.uint8), "RGB").save(os.path.join(d, "moon_phases.png"))
+
+    # sol: eclipse, aro rojo con el centro negro
+    r = np.hypot(xx - 64, yy - 64)
+    aro = np.clip(1 - np.abs(r - 34) / 6, 0, 1) + np.clip(1 - (r - 34) / 22, 0, 1) * (r > 34) * 0.4
+    sol = np.zeros((128, 128, 3), np.float32)
+    sol[..., 0] = aro * 0.95
+    sol[..., 1] = aro * 0.12
+    sol[..., 2] = aro * 0.05
+    Image.fromarray((np.clip(sol, 0, 1) * 255).astype(np.uint8), "RGB").save(os.path.join(d, "sun.png"))
+
+    # nubes: manchas oscuras de color sangre seca
+    n = modelos.ruido(256, 256, 16, rng) * 0.7 + modelos.ruido(256, 256, 5, rng) * 0.3
+    mascara = n > 0.52
+    nubes = np.zeros((256, 256, 4), np.uint8)
+    nubes[..., 0] = 70
+    nubes[..., 1] = 18
+    nubes[..., 2] = 20
+    nubes[..., 3] = np.where(mascara, 255, 0)
+    Image.fromarray(nubes, "RGBA").save(os.path.join(d, "clouds.png"))
+
+    # lluvia: gotas rojas
+    lluvia = np.zeros((256, 64, 4), np.uint8)
+    for _ in range(140):
+        x, y, largo = rng.integers(0, 64), rng.integers(0, 256), rng.integers(6, 18)
+        for k in range(largo):
+            lluvia[(y + k) % 256, x] = [150 + rng.integers(0, 60), 0, 0, 150 + k * 5]
+    Image.fromarray(lluvia, "RGBA").save(os.path.join(d, "rain.png"))
 
 
 def texturas_particulas():
@@ -401,7 +491,7 @@ def manifiestos():
         "format_version": 2,
         "header": {
             "name": "ECO §4Comportamiento",
-            "description": "No estás solo. v2.1.1",
+            "description": "No estás solo. v2.2.0",
             "uuid": UUID["bp"], "version": VERSION, "min_engine_version": MIN_MOTOR,
         },
         "modules": [
@@ -419,7 +509,7 @@ def manifiestos():
         "format_version": 2,
         "header": {
             "name": "ECO §4Recursos",
-            "description": "Modelos, sonidos y niebla de ECO. v2.1.1",
+            "description": "Modelos, sonidos y niebla de ECO. v2.2.0",
             "uuid": UUID["rp"], "version": VERSION, "min_engine_version": MIN_MOTOR,
         },
         "modules": [{"type": "resources", "uuid": UUID["rp_recursos"], "version": VERSION}],
@@ -471,6 +561,7 @@ def main():
     for ident, p in PARTICULAS.items():
         escribir(os.path.join(RP, "particles", f"eco_{ident}.json"), p)
     texturas_particulas()
+    texturas_entorno()
     for ident, n in nieblas().items():
         escribir(os.path.join(RP, "fogs", f"eco_{ident}.json"), n)
     escribir(os.path.join(RP, "sounds", "sound_definitions.json"), {

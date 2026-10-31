@@ -1,13 +1,13 @@
-# ECO v2.1.1: terror para Minecraft Bedrock
+# ECO v2.2.0: terror para Minecraft Bedrock
 
 ## ⬇️ Descargar
-**[Descargar ECO_v2.1.1.mcaddon](https://github.com/onlyclaude455-star/eco-minecraft/raw/main/ECO_v2.1.1.mcaddon)**
+**[Descargar ECO_v2.2.0.mcaddon](https://github.com/onlyclaude455-star/eco-minecraft/raw/main/ECO_v2.2.0.mcaddon)**
 
-En el iPhone: toca el enlace → Descargar → abre la app Archivos → toca `ECO_v2.1.1.mcaddon` → Compartir → Minecraft.
+En el iPhone: toca el enlace → Descargar → abre la app Archivos → toca `ECO_v2.2.0.mcaddon` → Compartir → Minecraft.
 
 ![El Imitador y El Testigo](imagenes/preview_cuerpo.png)
 
-Archivo para instalar: `ECO_v2.1.1.mcaddon` (en la raíz del repositorio). Contiene el paquete de comportamiento y el de recursos.
+Archivo para instalar: `ECO_v2.2.0.mcaddon` (en la raíz del repositorio). Contiene el paquete de comportamiento y el de recursos.
 Para regenerarlo después de cambiar algo: `python3 tools/build.py`. Hace falta Python con numpy y Pillow, espeak-ng y ffmpeg.
 
 ## Instalación en el iPhone
@@ -16,6 +16,17 @@ Para regenerarlo después de cambiar algo: `python3 tools/build.py`. Hace falta 
 3. En el mundo, ve a **Paquetes de comportamiento** y activa **ECO Comportamiento**. El paquete de recursos se activa solo porque el de comportamiento depende de él. Si te pregunta, acepta activar también el de recursos.
 4. No hace falta activar ningún experimento.
 5. Si algo falla: Configuración → Creador → activa el **Registro de contenido (GUI)**. Los errores salen en pantalla. Hazles captura.
+
+## Ambiente: todo grita peligro
+![La luna](imagenes/luna.png)
+
+- **Todas las noches son rojas.** Niebla y cielo rojo sangre cada noche. La luna roja es todavía peor: más densa y más oscura.
+- **La luna tiene cara:** cuencas vacías, lágrimas de sangre y una sonrisa torcida que **crece un poco cada noche**.
+- **El sol es un eclipse:** un aro rojo con el centro negro.
+- **Nubes de sangre seca** y **lluvia roja.** Casi la mitad de las noches llueve sangre.
+- **De día, bruma gris y enfermiza.** Nunca se ve del todo lejos.
+- **Sonidos de ambiente:** de noche, cada 15–30 segundos, gritos lejanos, risas, golpes, pasos, latidos y un coro de susurros. De día, alguno suelto.
+- Al anochecer aparece un aviso: "La luna ya te está mirando", "Cierra las puertas"…
 
 ## Las entidades
 - **El Testigo**: pálido, de 3,2 a 4,4 bloques de alto (cada uno sale de una altura distinta). Tiene pelo negro mojado, ojos hundidos con pupilas que brillan, lágrimas de sangre y una sonrisa cortada de oreja a oreja.

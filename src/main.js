@@ -5,7 +5,7 @@
 import { world, system, BlockPermutation, EntityDamageCause, DyeColor, WeatherType, ItemStack } from "@minecraft/server";
 import { MessageFormData } from "@minecraft/server-ui";
 
-const VERSION = "2.1.1";
+const VERSION = "2.2.0";
 let ultimoError = ""; // último fallo al invocar, para el comando de prueba
 
 // ------------------------------------------------------------------ textos
@@ -248,6 +248,7 @@ const jugadores = new Map(); // id de jugador -> estado
 let nocheActiva = false;
 let lunaRoja = false;
 let forzarLuna = false;
+let llueveSangre = false;
 
 function prop(clave, porDefecto) {
   const v = safe(() => world.getDynamicProperty(clave));
@@ -279,7 +280,7 @@ function estado(p) {
     let guion = 0;
     while (guion < GUION.length && GUION[guion][0] < seg - 5) guion++;
     e = {
-      guion, proximo: tick() + 20 * 8, proxDia: tick() + 20 * rint(90, 180),
+      guion, proximo: tick() + 20 * 8, proxAmbiente: tick() + 20 * 20, proxDia: tick() + 20 * rint(90, 180),
       bloqueado: false, ultimo: "", ultimoSusto: -99999,
     };
     jugadores.set(p.id, e);
@@ -349,12 +350,28 @@ function golpear(p, desde, dano) {
 }
 
 // ------------------------------------------------------------------ niebla y luna roja
+// todas las noches son rojas; la luna roja, todavía más. De día, bruma gris.
 function aplicarNiebla(p) {
   comando(p, "fog @s remove eco_niebla");
   comando(p, "fog @s remove eco_roja");
-  if (!nocheActiva) return;
-  if (lunaRoja) comando(p, "fog @s push eco:niebla_roja eco_roja");
-  else if (fase() >= 2) comando(p, "fog @s push eco:niebla eco_niebla");
+  if (!nocheActiva) comando(p, "fog @s push eco:dia_gris eco_niebla");
+  else if (lunaRoja) comando(p, "fog @s push eco:niebla_roja eco_roja");
+  else comando(p, "fog @s push eco:noche_sangre eco_niebla");
+}
+
+// sonidos lejanos que no deberían estar ahí
+const AMBIENTE_NOCHE = [
+  ["eco.grito", 0.3, 0.55, 30, 45], ["eco.grito2", 0.3, 0.6, 30, 45], ["eco.risa", 0.5, 0.8, 20, 35],
+  ["eco.zumbido", 0.7, 0.8, 0, 0], ["eco.coro", 0.25, 0.9, 6, 12], ["mob.warden.heartbeat", 0.6, 0.9, 0, 0],
+  ["dig.wood", 0.8, 0.5, 8, 14], ["ambient.cave", 0.9, 0.7, 4, 10], ["random.door_close", 0.6, 0.6, 10, 18],
+  ["step.gravel", 0.7, 0.6, 6, 10],
+];
+const AMBIENTE_DIA = [["ambient.cave", 0.6, 0.6, 4, 10], ["eco.risa", 0.25, 0.7, 35, 50], ["eco.zumbido", 0.4, 0.7, 0, 0]];
+
+function ambiente(p, lista) {
+  const [id, vol, tono, dmin, dmax] = pick(lista);
+  const pos = dmax ? add(p.getHeadLocation(), mul(girar(dirHorizontal(p), rnd(0, 360)), rnd(dmin, dmax))) : p.getHeadLocation();
+  sonido(p, id, pos, vol, tono);
 }
 
 function iniciarLunaRoja() {
@@ -1247,14 +1264,25 @@ function empezarNoche() {
   if (luna) {
     forzarLuna = false;
     despues(20 * 12, iniciarLunaRoja);
+  } else if (Math.random() < 0.45) {
+    llueveSangre = true;
+    safe(() => world.getDimension("overworld").setWeather(WeatherType.Rain, 10400));
   }
-  for (const p of world.getAllPlayers()) aplicarNiebla(p);
+  for (const p of world.getAllPlayers()) {
+    aplicarNiebla(p);
+    if (p.dimension.id !== "minecraft:overworld") continue;
+    sonido(p, "eco.zumbido", p.location, 0.8, 0.6);
+    despues(40, () => safe(() => p.onScreenDisplay.setActionBar(pick([
+      "§4La luna ya te está mirando.", "§4Cierra las puertas.", "§4No estás solo esta noche.", "§4Ya salió.",
+    ]))));
+  }
 }
 
 function terminarNoche() {
   nocheActiva = false;
   const eraLuna = lunaRoja;
-  if (lunaRoja) safe(() => world.getDimension("overworld").setWeather(WeatherType.Clear, 6000));
+  if (lunaRoja || llueveSangre) safe(() => world.getDimension("overworld").setWeather(WeatherType.Clear, 6000));
+  llueveSangre = false;
   lunaRoja = false;
   for (const c of [...monstruos.values()]) if (!c.datos.forzado) desaparecer(c, true, true);
   for (const p of world.getAllPlayers()) {
@@ -1302,6 +1330,10 @@ function cicloSegundo() {
     const e = estado(p);
     if (e.bloqueado) continue;
 
+    if (tick() >= (e.proxAmbiente ?? 0)) {
+      e.proxAmbiente = tick() + 20 * (nocheActiva ? rint(14, 32) : rint(60, 140));
+      if (nocheActiva || noches() >= 1) ambiente(p, nocheActiva ? AMBIENTE_NOCHE : AMBIENTE_DIA);
+    }
     if (!nocheActiva) {
       if (noches() < 1) continue; // el primer día es tranquilo
       if (t >= 9000 && tocaLunaManana() && prop("eco:aviso_luna", -1) !== indiceDia()) {
