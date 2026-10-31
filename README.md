@@ -1,13 +1,13 @@
-# ECO v2.2.1: terror para Minecraft Bedrock
+# ECO v2.2.2: terror para Minecraft Bedrock
 
 ## ⬇️ Descargar
-**[Descargar ECO_v2.2.1.mcaddon](https://github.com/onlyclaude455-star/eco-minecraft/raw/main/ECO_v2.2.1.mcaddon)**
+**[Descargar ECO_v2.2.2.mcaddon](https://github.com/onlyclaude455-star/eco-minecraft/raw/main/ECO_v2.2.2.mcaddon)**
 
-En el iPhone: toca el enlace → Descargar → abre la app Archivos → toca `ECO_v2.2.1.mcaddon` → Compartir → Minecraft.
+En el iPhone: toca el enlace → Descargar → abre la app Archivos → toca `ECO_v2.2.2.mcaddon` → Compartir → Minecraft.
 
 ![El Imitador y El Testigo](imagenes/preview_cuerpo.png)
 
-Archivo para instalar: `ECO_v2.2.1.mcaddon` (en la raíz del repositorio). Contiene el paquete de comportamiento y el de recursos.
+Archivo para instalar: `ECO_v2.2.2.mcaddon` (en la raíz del repositorio). Contiene el paquete de comportamiento y el de recursos.
 Para regenerarlo después de cambiar algo: `python3 tools/build.py`. Hace falta Python con numpy y Pillow, espeak-ng y ffmpeg.
 
 ## Instalación en el iPhone

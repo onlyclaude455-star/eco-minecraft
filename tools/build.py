@@ -23,7 +23,7 @@ DIST = os.path.join(RAIZ, "dist")
 BP = os.path.join(BUILD, "ECO_BP")
 RP = os.path.join(BUILD, "ECO_RP")
 
-VERSION = [2, 2, 1]
+VERSION = [2, 2, 2]
 MIN_MOTOR = [1, 21, 50]
 API_SERVER = "1.16.0"
 API_UI = "1.3.0"
@@ -363,7 +363,7 @@ def nieblas():
         "niebla": niebla("niebla", "#0b0b0e", 6, 42),
         "niebla_roja": niebla("niebla_roja", "#3d0000", 3, 30),
         # todas las noches: cielo rojo oscuro
-        "noche_sangre": niebla("noche_sangre", "#4a0606", 10, 64),
+        "noche_sangre": niebla("noche_sangre", "#7a0a0a", 6, 44),
         # de día: bruma gris y enfermiza
         "dia_gris": niebla("dia_gris", "#7d716b", 24, 120),
     }
@@ -449,7 +449,8 @@ def texturas_entorno():
         x, y, largo = rng.integers(0, 64), rng.integers(0, 256), rng.integers(6, 18)
         for k in range(largo):
             lluvia[(y + k) % 256, x] = [150 + rng.integers(0, 60), 0, 0, 150 + k * 5]
-    Image.fromarray(lluvia, "RGBA").save(os.path.join(d, "rain.png"))
+    # Bedrock usa weather.png para la lluvia (rain.png es el nombre de Java)
+    Image.fromarray(lluvia, "RGBA").save(os.path.join(d, "weather.png"))
 
 
 def texturas_particulas():
@@ -491,7 +492,7 @@ def manifiestos():
         "format_version": 2,
         "header": {
             "name": "ECO §4Comportamiento",
-            "description": "No estás solo. v2.2.1",
+            "description": "No estás solo. v2.2.2",
             "uuid": UUID["bp"], "version": VERSION, "min_engine_version": MIN_MOTOR,
         },
         "modules": [
@@ -509,7 +510,7 @@ def manifiestos():
         "format_version": 2,
         "header": {
             "name": "ECO §4Recursos",
-            "description": "Modelos, sonidos y niebla de ECO. v2.2.1",
+            "description": "Modelos, sonidos y niebla de ECO. v2.2.2",
             "uuid": UUID["rp"], "version": VERSION, "min_engine_version": MIN_MOTOR,
         },
         "modules": [{"type": "resources", "uuid": UUID["rp_recursos"], "version": VERSION}],

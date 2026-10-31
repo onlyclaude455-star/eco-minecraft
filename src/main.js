@@ -5,7 +5,7 @@
 import { world, system, BlockPermutation, EntityDamageCause, DyeColor, WeatherType, ItemStack } from "@minecraft/server";
 import { MessageFormData } from "@minecraft/server-ui";
 
-const VERSION = "2.2.1";
+const VERSION = "2.2.2";
 let ultimoError = ""; // último fallo al invocar, para el comando de prueba
 
 // ------------------------------------------------------------------ textos
