@@ -5,7 +5,8 @@
 import { world, system, BlockPermutation, EntityDamageCause, DyeColor, WeatherType, ItemStack } from "@minecraft/server";
 import { MessageFormData } from "@minecraft/server-ui";
 
-const VERSION = "2.1.0";
+const VERSION = "2.1.1";
+let ultimoError = ""; // último fallo al invocar, para el comando de prueba
 
 // ------------------------------------------------------------------ textos
 // Las claves coinciden con los sonidos generados (eco.s.<clave> y eco.v.<clave>).
@@ -400,8 +401,14 @@ function alturaCara(ent) {
 }
 
 function invocar(tipo, pos, p, pose) {
-  const ent = safe(() => p.dimension.spawnEntity(`eco:${tipo}`, pos));
-  if (!ent) return undefined;
+  let ent;
+  try {
+    ent = p.dimension.spawnEntity(`eco:${tipo}`, pos);
+  } catch (e) {
+    ultimoError = `no se pudo crear eco:${tipo}: ${e}`;
+    console.warn(`[ECO] ${ultimoError}`);
+    return undefined;
+  }
   safe(() => ent.setProperty("eco:altura", rint(0, 4)));
   safe(() => ent.setProperty("eco:estado", 0));
   safe(() => ent.setProperty("eco:pose", pose ?? (techoBajo(p.dimension, pos) ? 1 : 0)));
@@ -673,8 +680,11 @@ function testigo(p, modo, opciones = {}) {
     detras: [180, 2.2],
     caza: [rnd(150, 210), rnd(10, 14)],
   }[modo];
-  const pos = puntoRelativo(p, conf[0], conf[1]);
-  if (!pos) return false;
+  const pos = puntoRelativo(p, conf[0], conf[1]) ?? (opciones.forzado ? suelo(p.dimension, p.location.x + 3, p.location.y, p.location.z, 4, 6) : undefined);
+  if (!pos) {
+    ultimoError = "no encontré suelo libre alrededor";
+    return false;
+  }
   const ent = invocar("testigo", pos, p);
   if (!ent) return false;
   const c = registrar(ent, "testigo", modo === "caza" ? "lejos" : modo, p, opciones);
@@ -684,8 +694,11 @@ function testigo(p, modo, opciones = {}) {
 
 function imitador(p, opciones = {}) {
   if (monstruoDe(p, "imitador")) return false;
-  const pos = puntoRelativo(p, rnd(100, 260), rnd(20, 28));
-  if (!pos) return false;
+  const pos = puntoRelativo(p, rnd(100, 260), rnd(20, 28)) ?? (opciones.forzado ? suelo(p.dimension, p.location.x + 3, p.location.y, p.location.z, 4, 6) : undefined);
+  if (!pos) {
+    ultimoError = "no encontré suelo libre alrededor";
+    return false;
+  }
   const ent = invocar("imitador", pos, p);
   if (!ent) return false;
   const otros = world.getAllPlayers().filter((o) => o.id !== p.id);
@@ -1408,13 +1421,13 @@ function ejecutarComando(id, arg, p) {
       const modo = ["lejos", "acecho", "detras", "caza"].includes(a1) ? a1 : "detras";
       const c = monstruoDe(p, "testigo");
       if (c) desaparecer(c, false, false);
-      if (!testigo(p, modo, { forzado: true, dur: 20 * 30 })) p.sendMessage("§7No encontré sitio para El Testigo. Prueba en terreno abierto.");
+      if (!testigo(p, modo, { forzado: true, dur: 20 * 30 })) p.sendMessage(`§cEl Testigo no pudo aparecer: §7${ultimoError}`);
       return;
     }
     case "imitador": {
       const c = monstruoDe(p, "imitador");
       if (c) desaparecer(c, false, false);
-      if (!imitador(p, { forzado: true })) p.sendMessage("§7No encontré sitio para El Imitador. Prueba en terreno abierto.");
+      if (!imitador(p, { forzado: true })) p.sendMessage(`§cEl Imitador no pudo aparecer: §7${ultimoError}`);
       return;
     }
     case "fase": {

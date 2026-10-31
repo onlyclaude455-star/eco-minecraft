@@ -1,10 +1,10 @@
-# Lista de pruebas: ECO v2.1.0
+# Lista de pruebas: ECO v2.1.1
 
 Marca cada casilla cuando la pruebes y anota lo que veas. Antes de empezar, borra cualquier versión vieja de ECO (mira LEEME.md).
 
 ## Carga
 - [ ] Al entrar al mundo, ¿se cargan los **dos** paquetes? ¿Sale algún error en pantalla?
-- [ ] `/scriptevent eco:estado` responde con "ECO v2.1.0".
+- [ ] `/scriptevent eco:estado` responde con "ECO v2.1.1".
 
 ## Entidades (de noche: `/scriptevent eco:noche`)
 - [ ] **Modelo:** ¿se ven El Testigo y El Imitador con cuerpo, sangre y sonrisa? ¿O salen invisibles, en negro o como un cubo morado y negro?

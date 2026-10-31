@@ -1,4 +1,4 @@
-# ECO v2.1.0: terror para Minecraft Bedrock
+# ECO v2.1.1: terror para Minecraft Bedrock
 
 ## ⬇️ Descargar
 **[Descargar ECO.mcaddon](https://github.com/onlyclaude455-star/eco-minecraft/raw/main/ECO.mcaddon)**

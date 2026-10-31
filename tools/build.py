@@ -23,7 +23,7 @@ DIST = os.path.join(RAIZ, "dist")
 BP = os.path.join(BUILD, "ECO_BP")
 RP = os.path.join(BUILD, "ECO_RP")
 
-VERSION = [2, 1, 0]
+VERSION = [2, 1, 1]
 MIN_MOTOR = [1, 21, 50]
 API_SERVER = "1.16.0"
 API_UI = "1.3.0"
@@ -55,7 +55,7 @@ def escribir(ruta, datos):
 def entidad_bp(ident, velocidad):
     jugador = {"test": "is_family", "subject": "other", "value": "player"}
     return {
-        "format_version": "1.21.50",
+        "format_version": "1.20.80",
         "minecraft:entity": {
             "description": {
                 "identifier": f"eco:{ident}",
@@ -86,7 +86,7 @@ def entidad_bp(ident, velocidad):
                     },
                     "minecraft:behavior.melee_attack": {
                         "priority": 2, "speed_multiplier": 1.25, "track_target": True,
-                        "reach_multiplier": 2.2, "require_complete_path": False,
+                        "require_complete_path": False,
                     },
                     "minecraft:behavior.open_door": {"priority": 3, "close_door_after": False},
                 },
@@ -401,7 +401,7 @@ def manifiestos():
         "format_version": 2,
         "header": {
             "name": "ECO §4Comportamiento",
-            "description": "No estás solo. v2.1.0",
+            "description": "No estás solo. v2.1.1",
             "uuid": UUID["bp"], "version": VERSION, "min_engine_version": MIN_MOTOR,
         },
         "modules": [
@@ -419,7 +419,7 @@ def manifiestos():
         "format_version": 2,
         "header": {
             "name": "ECO §4Recursos",
-            "description": "Modelos, sonidos y niebla de ECO. v2.1.0",
+            "description": "Modelos, sonidos y niebla de ECO. v2.1.1",
             "uuid": UUID["rp"], "version": VERSION, "min_engine_version": MIN_MOTOR,
         },
         "modules": [{"type": "resources", "uuid": UUID["rp_recursos"], "version": VERSION}],
