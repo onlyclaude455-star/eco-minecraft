@@ -5,7 +5,7 @@
 import { world, system, BlockPermutation, EntityDamageCause, DyeColor, WeatherType, ItemStack } from "@minecraft/server";
 import { MessageFormData } from "@minecraft/server-ui";
 
-const VERSION = "2.2.0";
+const VERSION = "2.2.1";
 let ultimoError = ""; // último fallo al invocar, para el comando de prueba
 
 // ------------------------------------------------------------------ textos
@@ -134,6 +134,17 @@ function puntoRelativo(p, angulo, distancia, intentos = 8) {
     const d = girar(base, angulo + rnd(-25, 25) * (i / intentos));
     const r = distancia + rnd(-1.5, 1.5) * (i / intentos);
     const pos = suelo(p.dimension, p.location.x + d.x * r, p.location.y, p.location.z + d.z * r);
+    if (pos) return pos;
+  }
+  return undefined;
+}
+
+/** Respaldo: prueba muchas direcciones y distancias hasta encontrar suelo libre. */
+function sueloCercano(p, dmin, dmax, intentos = 40) {
+  for (let i = 0; i < intentos; i++) {
+    const d = girar({ x: 1, y: 0, z: 0 }, rnd(0, 360));
+    const r = rnd(dmin, dmax);
+    const pos = suelo(p.dimension, p.location.x + d.x * r, p.location.y, p.location.z + d.z * r, 10, 14);
     if (pos) return pos;
   }
   return undefined;
@@ -697,7 +708,7 @@ function testigo(p, modo, opciones = {}) {
     detras: [180, 2.2],
     caza: [rnd(150, 210), rnd(10, 14)],
   }[modo];
-  const pos = puntoRelativo(p, conf[0], conf[1]) ?? (opciones.forzado ? suelo(p.dimension, p.location.x + 3, p.location.y, p.location.z, 4, 6) : undefined);
+  const pos = puntoRelativo(p, conf[0], conf[1]) ?? sueloCercano(p, modo === "detras" ? 2 : 6, modo === "detras" ? 3.5 : conf[1]);
   if (!pos) {
     ultimoError = "no encontré suelo libre alrededor";
     return false;
@@ -711,7 +722,7 @@ function testigo(p, modo, opciones = {}) {
 
 function imitador(p, opciones = {}) {
   if (monstruoDe(p, "imitador")) return false;
-  const pos = puntoRelativo(p, rnd(100, 260), rnd(20, 28)) ?? (opciones.forzado ? suelo(p.dimension, p.location.x + 3, p.location.y, p.location.z, 4, 6) : undefined);
+  const pos = puntoRelativo(p, rnd(100, 260), rnd(20, 28)) ?? sueloCercano(p, 12, 26);
   if (!pos) {
     ultimoError = "no encontré suelo libre alrededor";
     return false;

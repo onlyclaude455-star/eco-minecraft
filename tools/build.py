@@ -23,7 +23,7 @@ DIST = os.path.join(RAIZ, "dist")
 BP = os.path.join(BUILD, "ECO_BP")
 RP = os.path.join(BUILD, "ECO_RP")
 
-VERSION = [2, 2, 0]
+VERSION = [2, 2, 1]
 MIN_MOTOR = [1, 21, 50]
 API_SERVER = "1.16.0"
 API_UI = "1.3.0"
@@ -491,7 +491,7 @@ def manifiestos():
         "format_version": 2,
         "header": {
             "name": "ECO §4Comportamiento",
-            "description": "No estás solo. v2.2.0",
+            "description": "No estás solo. v2.2.1",
             "uuid": UUID["bp"], "version": VERSION, "min_engine_version": MIN_MOTOR,
         },
         "modules": [
@@ -509,7 +509,7 @@ def manifiestos():
         "format_version": 2,
         "header": {
             "name": "ECO §4Recursos",
-            "description": "Modelos, sonidos y niebla de ECO. v2.2.0",
+            "description": "Modelos, sonidos y niebla de ECO. v2.2.1",
             "uuid": UUID["rp"], "version": VERSION, "min_engine_version": MIN_MOTOR,
         },
         "modules": [{"type": "resources", "uuid": UUID["rp_recursos"], "version": VERSION}],
